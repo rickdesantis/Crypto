@@ -1,0 +1,34 @@
+#!/bin/sh
+
+export CRYPTO_HOME="${CRYPTO_HOME:-$PWD}"
+
+if [ ! -e "$CRYPTO_HOME" ]
+then
+    echo "$CRYPTO_HOME does not exist" 1>&2
+    exit 1
+fi
+
+JAR="$CRYPTO_HOME/crypto.jar"
+JARBC="$CRYPTO_HOME/bcprov-jdk16-1.45.jar"
+CLASS="it.polimi.crypto.Main"
+if [ ! -e "$JAR" ]
+then
+    echo "Can't find jarfile to run"
+    exit 1
+fi
+
+# Deal with Cygwin path issues
+cygwin=false
+case "`uname`" in
+    CYGWIN*) cygwin=true;;
+esac
+if [ "$cygwin" = "true" ]
+then
+    JAR=`cygpath -w "$JAR"`
+    CRYPTO_HOME=`cygpath -w "$CRYPTO_HOME"`
+fi
+
+JVM_ARGS=${JVM_ARGS:--Xmx1200M}
+
+#exec java  $JVM_ARGS -jar "$JAR" "$@"
+exec java $JVM_ARGS -cp "$JAR":"$JARBC" "$CLASS" "$@"
